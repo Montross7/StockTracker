@@ -1,4 +1,9 @@
 package com.vlk.stocktracker.data.repository
 
-class StockRepository {
+import com.vlk.stocktracker.data.model.StockItem
+
+
+interface StockRepository {
+    suspend fun getTopFiveStock(): List<StockItem>
+
 }

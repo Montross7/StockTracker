@@ -29,22 +29,20 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun StockListScreen(
+    stockItems: List<StockUiItem> = emptyList(),
+    lastUpdatedDate: LocalDateTime = LocalDateTime.now()
 ) {
-    val stockItems = listOf(
-        StockUiItem("AAPL", "Apple", "$100", PriceTrend.INCREASING),
-        StockUiItem("MSFT", "Microsoft", "$200", PriceTrend.DECREASING),
-        StockUiItem("GOOG", "Google", "$300", PriceTrend.NEUTRAL),
-        StockUiItem("ALGN", "Align Technology", "$400", PriceTrend.INCREASING),
-        StockUiItem("SSG", "Shinsegae", "$240", PriceTrend.DECREASING),
-    )
 
-    val lastUpdatedDate = LocalDateTime.now()
+
+//    val lastUpdatedDate = LocalDateTime.now()
 
     Scaffold(modifier = Modifier.background(color = Color.White)) { innerPadding ->
         Column(Modifier.padding(innerPadding)) {
-            Row(modifier = Modifier
-                .padding(10.dp)
-                .fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .padding(10.dp)
+                    .fillMaxWidth()
+            ) {
                 Text(text = "Stock List")
                 Spacer(modifier = Modifier.weight(1.0f))
                 Text(text = "Last Updated: ${lastUpdatedDate.format(DateTimeFormatter.ofPattern("YYYY/MM/DD HH:mm:ss"))}")
@@ -84,7 +82,17 @@ fun StockListScreen(
 @Preview(showBackground = true)
 @Composable
 fun StockListScreenPreview() {
+    val stockItems = listOf(
+        StockUiItem("AAPL", "Apple", "$100", PriceTrend.INCREASING),
+        StockUiItem("MSFT", "Microsoft", "$200", PriceTrend.DECREASING),
+        StockUiItem("GOOG", "Google", "$300", PriceTrend.NEUTRAL),
+        StockUiItem("ALGN", "Align Technology", "$400", PriceTrend.INCREASING),
+        StockUiItem("SSG", "Shinsegae", "$240", PriceTrend.DECREASING),
+    )
     StockTrackerTheme {
-        StockListScreen()
+        StockListScreen(
+            stockItems = stockItems,
+            lastUpdatedDate = LocalDateTime.now()
+        )
     }
 }
