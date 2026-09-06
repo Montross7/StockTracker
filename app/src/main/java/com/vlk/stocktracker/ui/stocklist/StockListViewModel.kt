@@ -27,27 +27,34 @@ class StockListViewModel @Inject constructor(
 
     fun refreshStockList() {
         viewModelScope.launch {
-            val updatedList = getTopFiveStockList()
+            val updatedState = getTopFiveStockList()
 //            _stockList.value = updatedList
 //            _lastUpdatedDate.value = LocalDateTime.now()
-            _uiState.value = StockListUiState.Success(updatedList, LocalDateTime.now())
+            _uiState.value = updatedState
         }
     }
 
-    private suspend fun getTopFiveStockList(): List<StockUiItem> {
-        val data = stockRepository.getTopFiveStock()
-        return data.map {
-            val previousPrice = previousStockPriceMap[it.id]
-            val priceTrend = when {
-                previousPrice == null -> PriceTrend.NEUTRAL
-                it.price > previousPrice
-                    -> PriceTrend.INCREASING
+    private suspend fun getTopFiveStockList(): StockListUiState {
+        try {
+            val data = stockRepository.getTopFiveStock()
+            return StockListUiState.Success(
+                data.map {
+                    val previousPrice = previousStockPriceMap[it.id]
+                    val priceTrend = when {
+                        previousPrice == null -> PriceTrend.NEUTRAL
+                        it.price > previousPrice
+                            -> PriceTrend.INCREASING
 
-                it.price < previousPrice -> PriceTrend.DECREASING
-                else -> PriceTrend.NEUTRAL
-            }
-            previousStockPriceMap[it.id] = it.price
-            StockUiItem(it.id, it.name, "€%.2f".format(it.price), priceTrend)
+                        it.price < previousPrice -> PriceTrend.DECREASING
+                        else -> PriceTrend.NEUTRAL
+                    }
+                    previousStockPriceMap[it.id] = it.price
+                    StockUiItem(it.id, it.name, "€%.2f".format(it.price), priceTrend)
+                },
+                LocalDateTime.now()
+            )
+        } catch (e: Exception) {
+            return StockListUiState.Error(e.localizedMessage ?: "Failed to Load Data")
         }
     }
 

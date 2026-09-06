@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.vlk.stocktracker.domain.model.PriceTrend
 import com.vlk.stocktracker.domain.model.StockUiItem
 import com.vlk.stocktracker.ui.theme.Red
@@ -149,7 +150,8 @@ fun StockListScreen(
                             uiState.message,
                             style = MaterialTheme.typography.titleLarge,
                             textAlign = TextAlign.Center,
-                            color = Red
+                            color = Red,
+                            fontSize = 20.sp
                         )
                     }
 

@@ -18,8 +18,7 @@ import kotlin.time.Duration.Companion.milliseconds
 fun StockTrackerApp(
     viewModel: StockListViewModel = hiltViewModel(),
 ) {
-//    val stockList = viewModel.stockList.collectAsStateWithLifecycle().value
-//    val lastUpdatedDate = viewModel.lastUpdatedDate.collectAsStateWithLifecycle().value
+
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 
 //    val lifecycleOwner = LocalLifecycleOwner.current

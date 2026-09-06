@@ -10,6 +10,11 @@ class StockRepositoryImpl @Inject constructor(
 ) : StockRepository {
 
     override suspend fun getTopFiveStock(): List<StockItem> {
-        return stockApiService.getTopFiveStock().data ?: emptyList()
+        try {
+            return stockApiService.getTopFiveStock().data ?: emptyList()
+
+        } catch (e: Exception) {
+            throw Exception(e.message)
+        }
     }
 }
