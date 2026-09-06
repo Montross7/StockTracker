@@ -20,16 +20,14 @@ fun StockTrackerApp(
     val stockList = viewModel.stockList.collectAsStateWithLifecycle().value
     val lastUpdatedDate = viewModel.lastUpdatedDate.collectAsStateWithLifecycle().value
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    LaunchedEffect(lifecycleOwner, viewModel) {
-        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            while (true) {
-                viewModel.refreshStockList()
-                val nextDelay = Random.nextLong(900, 1_001)
-                delay(nextDelay.milliseconds)
-            }
-        }
-    }
+//    val lifecycleOwner = LocalLifecycleOwner.current
+//    LaunchedEffect(lifecycleOwner, viewModel) {
+//        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//            while (true) {
+//                viewModel.refreshStockList()
+//                val nextDelay = Random.nextLong(900, 1_001)
+//                delay(nextDelay.milliseconds)
+//   }
 
-    StockListScreen(stockList, lastUpdatedDate)
+    StockListScreen(stockList, lastUpdatedDate, onRefresh = { viewModel.refreshStockList() })
 }
