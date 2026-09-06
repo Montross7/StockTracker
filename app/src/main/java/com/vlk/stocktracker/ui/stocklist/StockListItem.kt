@@ -8,13 +8,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,10 +23,10 @@ import com.vlk.stocktracker.ui.theme.StockTrackerTheme
 
 @Composable
 fun StockListItem(
+    modifier: Modifier = Modifier,
     name: String,
     price: String,
     itemState: PriceTrend = PriceTrend.NEUTRAL,
-    modifier: Modifier = Modifier
 ) {
     val color = when (itemState) {
         PriceTrend.DECREASING -> Red
@@ -62,7 +60,7 @@ fun StockListItem(
 @Composable
 fun StockListItemPreview() {
     StockTrackerTheme {
-        StockListItem("Android", price = "$100")
+        StockListItem(name = "Android", price = "$100")
     }
 }
 
@@ -70,7 +68,7 @@ fun StockListItemPreview() {
 @Composable
 fun StockListItemDecreasePreview() {
     StockTrackerTheme {
-        StockListItem("Android", price = "$100", itemState = PriceTrend.DECREASING)
+        StockListItem(name = "Android", price = "$100", itemState = PriceTrend.DECREASING)
     }
 }
 
@@ -78,6 +76,6 @@ fun StockListItemDecreasePreview() {
 @Composable
 fun StockListItemIncreasingPreview() {
     StockTrackerTheme {
-        StockListItem("Android", price = "$100", itemState = PriceTrend.INCREASING)
+        StockListItem(name = "Android", price = "$100", itemState = PriceTrend.INCREASING)
     }
 }

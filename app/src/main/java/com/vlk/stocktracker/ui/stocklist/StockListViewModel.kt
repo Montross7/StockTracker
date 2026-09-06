@@ -27,7 +27,14 @@ class StockListViewModel @Inject constructor(
 
     fun refreshStockList() {
         viewModelScope.launch {
-            _uiState.value = fetchTopFiveStockList()
+            val current = _uiState.value
+            if (current is StockListUiState.Success) {
+                _uiState.value = current.copy(isRefreshing = true)
+            }
+
+            val result = fetchTopFiveStockList()
+
+            _uiState.value = result
         }
     }
 

@@ -8,7 +8,8 @@ sealed interface StockListUiState {
 
     data class Success(
         val items: List<StockUiItem>,
-        val lastUpdatedDate: LocalDateTime
+        val lastUpdatedDate: LocalDateTime,
+        val isRefreshing: Boolean = false
     ) : StockListUiState
 
     data class Error(
