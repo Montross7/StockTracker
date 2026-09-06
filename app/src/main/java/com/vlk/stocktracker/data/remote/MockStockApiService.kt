@@ -1,9 +1,11 @@
 package com.vlk.stocktracker.data.remote
 
 import com.vlk.stocktracker.data.model.StockItem
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 class MockStockApiService @Inject constructor() : StockApiService {
 
@@ -40,6 +42,7 @@ class MockStockApiService @Inject constructor() : StockApiService {
 
     override suspend fun getTopFiveStock(): ApiResponse<List<StockItem>> {
         updateStockList()
+        delay(1000.milliseconds)
         return ApiResponse(
             code = 200,
             message = "success",

@@ -5,8 +5,8 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,10 +39,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.vlk.stocktracker.domain.model.PriceTrend
 import com.vlk.stocktracker.domain.model.StockUiItem
+import com.vlk.stocktracker.ui.theme.Red
 import com.vlk.stocktracker.ui.theme.StockTrackerTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -50,8 +52,7 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun StockListScreen(
-    stockItems: List<StockUiItem> = emptyList(),
-    lastUpdatedDate: LocalDateTime = LocalDateTime.now(),
+    uiState: StockListUiState,
     onRefresh: () -> Unit = {}
 ) {
 
@@ -118,45 +119,68 @@ fun StockListScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.weight(1.0f))
-                    Text(
-                        text = "Last Updated: ${
-                            lastUpdatedDate.format(
-                                DateTimeFormatter.ofPattern(
-                                    "YYYY/MM/DD HH:mm:ss"
-                                )
+                    when (uiState) {
+                        is StockListUiState.Loading -> {}
+                        is StockListUiState.Error -> {}
+                        is StockListUiState.Success -> {
+                            Text(
+                                text = "Last Updated: ${
+                                    uiState.lastUpdatedDate.format(
+                                        DateTimeFormatter.ofPattern(
+                                            "yyyy/MM/DD HH:mm:ss"
+                                        )
+                                    )
+                                }",
+                                style = MaterialTheme.typography.bodyMedium
                             )
-                        }",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                        }
+                    }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
 
-                LazyColumn(
-                    modifier = Modifier
-                ) {
-                    items(items = stockItems, key = { it.id }) { item ->
-                        StockListItem(
-                            modifier = Modifier
-                                .animateItem(
-                                    fadeInSpec = tween(300),
-                                    fadeOutSpec = tween(300),
-                                    placementSpec = spring(
-                                        dampingRatio = Spring.DampingRatioLowBouncy,
-                                        stiffness = Spring.StiffnessLow
-                                    )
-
-                                ),
-                            name = item.name,
-                            price = item.price,
-                            itemState = item.priceTrend
-                        )
-                        HorizontalDivider(
-                            Modifier,
-                            DividerDefaults.Thickness,
-                            DividerDefaults.color
+                when (uiState) {
+                    is StockListUiState.Loading -> com.vlk.stocktracker.ui.common.LoadingIndicator()
+                    is StockListUiState.Error -> Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            uiState.message,
+                            style = MaterialTheme.typography.titleLarge,
+                            textAlign = TextAlign.Center,
+                            color = Red
                         )
                     }
+
+                    is StockListUiState.Success -> LazyColumn(
+                        modifier = Modifier
+                    ) {
+                        items(items = uiState.items, key = { it.id }) { item ->
+                            StockListItem(
+                                modifier = Modifier
+                                    .animateItem(
+                                        fadeInSpec = tween(300),
+                                        fadeOutSpec = tween(300),
+                                        placementSpec = spring(
+                                            dampingRatio = Spring.DampingRatioLowBouncy,
+                                            stiffness = Spring.StiffnessLow
+                                        )
+
+                                    ),
+                                name = item.name,
+                                price = item.price,
+                                itemState = item.priceTrend
+                            )
+                            HorizontalDivider(
+                                Modifier,
+                                DividerDefaults.Thickness,
+                                DividerDefaults.color
+                            )
+                        }
+                    }
                 }
+
             }
             Icon(
                 imageVector = Icons.Default.Refresh,
@@ -184,8 +208,17 @@ fun StockListScreenPreview() {
     )
     StockTrackerTheme {
         StockListScreen(
-            stockItems = stockItems,
-            lastUpdatedDate = LocalDateTime.now()
+            uiState = StockListUiState.Success(stockItems, LocalDateTime.now()),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StockListScreenErrorPreview() {
+    StockTrackerTheme {
+        StockListScreen(
+            uiState = StockListUiState.Error("Failed To Fetch Data"),
         )
     }
 }

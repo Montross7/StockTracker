@@ -2,6 +2,7 @@ package com.vlk.stocktracker
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -17,8 +18,9 @@ import kotlin.time.Duration.Companion.milliseconds
 fun StockTrackerApp(
     viewModel: StockListViewModel = hiltViewModel(),
 ) {
-    val stockList = viewModel.stockList.collectAsStateWithLifecycle().value
-    val lastUpdatedDate = viewModel.lastUpdatedDate.collectAsStateWithLifecycle().value
+//    val stockList = viewModel.stockList.collectAsStateWithLifecycle().value
+//    val lastUpdatedDate = viewModel.lastUpdatedDate.collectAsStateWithLifecycle().value
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 
 //    val lifecycleOwner = LocalLifecycleOwner.current
 //    LaunchedEffect(lifecycleOwner, viewModel) {
@@ -29,5 +31,5 @@ fun StockTrackerApp(
 //                delay(nextDelay.milliseconds)
 //   }
 
-    StockListScreen(stockList, lastUpdatedDate, onRefresh = { viewModel.refreshStockList() })
+    StockListScreen(uiState.value, onRefresh = { viewModel.refreshStockList() })
 }

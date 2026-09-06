@@ -2,37 +2,35 @@ package com.vlk.stocktracker.ui.stocklist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.vlk.stocktracker.data.model.StockItem
 import com.vlk.stocktracker.data.repository.StockRepository
 import com.vlk.stocktracker.domain.model.PriceTrend
 import com.vlk.stocktracker.domain.model.StockUiItem
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class StockListViewModel @Inject constructor(
     private val stockRepository: StockRepository
 ) : ViewModel() {
 
-    private val _stockList = MutableStateFlow<List<StockUiItem>>(emptyList())
-    val stockList: StateFlow<List<StockUiItem>> = _stockList.asStateFlow()
-
-    private val _lastUpdatedDate = MutableStateFlow<LocalDateTime>(LocalDateTime.now())
-    val lastUpdatedDate: StateFlow<LocalDateTime> = _lastUpdatedDate.asStateFlow()
-
-
     private val previousStockPriceMap = mutableMapOf<String, Float>()
+
+    private val _uiState = MutableStateFlow<StockListUiState>(StockListUiState.Loading)
+    val uiState: StateFlow<StockListUiState> = _uiState.asStateFlow()
 
     fun refreshStockList() {
         viewModelScope.launch {
             val updatedList = getTopFiveStockList()
-            _stockList.value = updatedList
-            _lastUpdatedDate.value = LocalDateTime.now()
+//            _stockList.value = updatedList
+//            _lastUpdatedDate.value = LocalDateTime.now()
+            _uiState.value = StockListUiState.Success(updatedList, LocalDateTime.now())
         }
     }
 
@@ -43,7 +41,7 @@ class StockListViewModel @Inject constructor(
             val priceTrend = when {
                 previousPrice == null -> PriceTrend.NEUTRAL
                 it.price > previousPrice
-                -> PriceTrend.INCREASING
+                    -> PriceTrend.INCREASING
 
                 it.price < previousPrice -> PriceTrend.DECREASING
                 else -> PriceTrend.NEUTRAL
@@ -54,6 +52,6 @@ class StockListViewModel @Inject constructor(
     }
 
     init {
-        // Initial fetch handled by UI lifecycle
+        refreshStockList()
     }
 }
