@@ -2,18 +2,18 @@ package com.vlk.stocktracker.ui.stocklist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vlk.stocktracker.data.model.StockItem
 import com.vlk.stocktracker.data.repository.StockRepository
 import com.vlk.stocktracker.domain.model.PriceTrend
 import com.vlk.stocktracker.domain.model.StockUiItem
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class StockListViewModel @Inject constructor(
@@ -27,38 +27,47 @@ class StockListViewModel @Inject constructor(
 
     fun refreshStockList() {
         viewModelScope.launch {
-            val updatedState = getTopFiveStockList()
-//            _stockList.value = updatedList
-//            _lastUpdatedDate.value = LocalDateTime.now()
-            _uiState.value = updatedState
+            _uiState.value = fetchTopFiveStockList()
         }
     }
 
-    private suspend fun getTopFiveStockList(): StockListUiState {
+    private suspend fun fetchTopFiveStockList(): StockListUiState {
         try {
             val data = stockRepository.getTopFiveStock()
-            return StockListUiState.Success(
-                data.map {
-                    val previousPrice = previousStockPriceMap[it.id]
-                    val priceTrend = when {
-                        previousPrice == null -> PriceTrend.NEUTRAL
-                        it.price > previousPrice
-                            -> PriceTrend.INCREASING
-
-                        it.price < previousPrice -> PriceTrend.DECREASING
-                        else -> PriceTrend.NEUTRAL
-                    }
-                    previousStockPriceMap[it.id] = it.price
-                    StockUiItem(it.id, it.name, "€%.2f".format(it.price), priceTrend)
-                },
-                LocalDateTime.now()
-            )
+            return mapToUiState(data)
         } catch (e: Exception) {
             return StockListUiState.Error(e.localizedMessage ?: "Failed to Load Data")
         }
     }
 
+    private fun mapToUiState(data: List<StockItem>): StockListUiState {
+        return StockListUiState.Success(
+            data.map {
+                val previousPrice = previousStockPriceMap[it.id]
+                val priceTrend = when {
+                    previousPrice == null -> PriceTrend.NEUTRAL
+                    it.price > previousPrice
+                    -> PriceTrend.INCREASING
+
+                    it.price < previousPrice -> PriceTrend.DECREASING
+                    else -> PriceTrend.NEUTRAL
+                }
+                previousStockPriceMap[it.id] = it.price
+                StockUiItem(it.id, it.name, "€%.2f".format(it.price), priceTrend)
+            },
+            LocalDateTime.now()
+        )
+    }
+
     init {
-        refreshStockList()
+        viewModelScope.launch {
+            stockRepository.getStockUpdates()
+                .catch { e ->
+                    _uiState.value = StockListUiState.Error(e.localizedMessage ?: "Stream Error")
+                }
+                .collect { data ->
+                    _uiState.value = mapToUiState(data)
+                }
+        }
     }
 }
