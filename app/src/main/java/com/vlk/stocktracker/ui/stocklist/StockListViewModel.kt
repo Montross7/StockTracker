@@ -25,10 +25,10 @@ class StockListViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<StockListUiState>(StockListUiState.Loading)
     val uiState: StateFlow<StockListUiState> = _uiState.asStateFlow()
 
-    fun refreshStockList() {
+    fun refreshStockList(isForceRefresh: Boolean = false) {
         viewModelScope.launch {
             val current = _uiState.value
-            if (current is StockListUiState.Success) {
+            if (current is StockListUiState.Success && isForceRefresh) {
                 _uiState.value = current.copy(isRefreshing = true)
             }
 
@@ -77,12 +77,13 @@ class StockListViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch {
-            stockRepository.getStockUpdates().catch { e ->
-                _uiState.value = StockListUiState.Error(e.localizedMessage ?: "Stream Error")
-            }.collect { data ->
-                _uiState.value = mapToUiState(data)
-            }
-        }
+//        viewModelScope.launch {
+//            stockRepository.getStockUpdates().catch { e ->
+//                _uiState.value = StockListUiState.Error(e.localizedMessage ?: "Stream Error")
+//            }.collect { data ->
+//                _uiState.value = mapToUiState(data)
+//            }
+//        }
+        refreshStockList()
     }
 }

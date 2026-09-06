@@ -32,7 +32,7 @@ class MockStockApiService @Inject constructor() : StockApiService {
         }
     }
 
-    private fun applyPriceFluctuation(items: List<StockItem>): List<StockItem> {
+    private fun applyPriceFluctuationRandomly(items: List<StockItem>): List<StockItem> {
         val n = Random.nextInt(1, items.size + 1)
         val indicesToUpdate = items.indices.shuffled().take(n).toSet()
 
@@ -46,6 +46,15 @@ class MockStockApiService @Inject constructor() : StockApiService {
             }
         }
     }
+
+    private fun applyPriceFluctuation(items: List<StockItem>): List<StockItem> {
+        return items.map { item ->
+            val delta = Random.nextFloat() * 10f - 5f
+            val newPrice = (item.price + delta).coerceAtLeast(0f)
+            item.copy(price = newPrice)
+        }
+    }
+
 
     private fun topFive(items: List<StockItem>): List<StockItem> =
         items.sortedByDescending { it.price }.take(5)
