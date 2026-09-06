@@ -111,9 +111,7 @@ fun StockListScreen(
                                         )
 
                                     ),
-                                name = item.name,
-                                price = item.price,
-                                itemState = item.priceTrend
+                                item = item
                             )
                             HorizontalDivider(
                                 Modifier,
@@ -133,11 +131,11 @@ fun StockListScreen(
 @Composable
 fun StockListScreenPreview() {
     val stockItems = listOf(
-        StockUiItem("AAPL", "Apple", "$100", PriceTrend.INCREASING),
-        StockUiItem("MSFT", "Microsoft", "$200", PriceTrend.DECREASING),
-        StockUiItem("GOOG", "Google", "$300", PriceTrend.NEUTRAL),
-        StockUiItem("ALGN", "Align Technology", "$400", PriceTrend.INCREASING),
-        StockUiItem("SSG", "Shinsegae", "$240", PriceTrend.DECREASING),
+        StockUiItem("AAPL", "Apple", 100f, PriceTrend.INCREASING, 10f, 10f),
+        StockUiItem("MSFT", "Microsoft", 200f, PriceTrend.DECREASING, -10f, -10f),
+        StockUiItem("GOOG", "Google", 300f, PriceTrend.NEUTRAL, 0f, 0f),
+        StockUiItem("ALGN", "Align Technology", 400f, PriceTrend.INCREASING, 5f, 10f),
+        StockUiItem("SSG", "Shinsegae", 240f, PriceTrend.DECREASING, -3.45f, 12.23f),
     )
     StockTrackerTheme {
         StockListScreen(

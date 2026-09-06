@@ -51,30 +51,38 @@ class StockListViewModel @Inject constructor(
         return StockListUiState.Success(
             data.map {
                 val previousPrice = previousStockPriceMap[it.id]
-                val priceTrend = when {
-                    previousPrice == null -> PriceTrend.NEUTRAL
-                    it.price > previousPrice
-                    -> PriceTrend.INCREASING
+                val priceChange = if (previousPrice != null) it.price - previousPrice else 0f
+                val priceChangePercentage =
+                    if (previousPrice != null && previousPrice != 0f) (priceChange / previousPrice) * 100f
+                    else 0f
 
-                    it.price < previousPrice -> PriceTrend.DECREASING
+                val priceTrend = when {
+                    priceChange > 0f -> PriceTrend.INCREASING
+
+                    priceChange < 0f -> PriceTrend.DECREASING
                     else -> PriceTrend.NEUTRAL
                 }
+
                 previousStockPriceMap[it.id] = it.price
-                StockUiItem(it.id, it.name, "€%.2f".format(it.price), priceTrend)
-            },
-            LocalDateTime.now()
+                StockUiItem(
+                    it.id,
+                    it.name,
+                    it.price,
+                    priceTrend,
+                    priceChange,
+                    priceChangePercentage
+                )
+            }, LocalDateTime.now()
         )
     }
 
     init {
         viewModelScope.launch {
-            stockRepository.getStockUpdates()
-                .catch { e ->
-                    _uiState.value = StockListUiState.Error(e.localizedMessage ?: "Stream Error")
-                }
-                .collect { data ->
-                    _uiState.value = mapToUiState(data)
-                }
+            stockRepository.getStockUpdates().catch { e ->
+                _uiState.value = StockListUiState.Error(e.localizedMessage ?: "Stream Error")
+            }.collect { data ->
+                _uiState.value = mapToUiState(data)
+            }
         }
     }
 }
