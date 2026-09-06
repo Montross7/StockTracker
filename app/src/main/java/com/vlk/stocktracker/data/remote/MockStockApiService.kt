@@ -28,7 +28,7 @@ class MockStockApiService @Inject constructor() : StockApiService {
     }
 
     private fun generateRandomPrice(): Float {
-        return (Random.nextFloat() * 100 * 100).roundToInt() / 100.0f
+        return (Random.nextFloat() * 10 * 10).roundToInt() / 100.0f + 50
     }
 
     private fun updateStockList() {

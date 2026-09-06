@@ -28,14 +28,23 @@ class StockListViewModel @Inject constructor(
 
     private val previousStockPriceMap = mutableMapOf<String, Float>()
 
-    suspend fun getTopFiveStockList(): List<StockUiItem> {
+    fun refreshStockList() {
+        viewModelScope.launch {
+            val updatedList = getTopFiveStockList()
+            _stockList.value = updatedList
+            _lastUpdatedDate.value = LocalDateTime.now()
+        }
+    }
+
+    private suspend fun getTopFiveStockList(): List<StockUiItem> {
         val data = stockRepository.getTopFiveStock()
         return data.map {
             val previousPrice = previousStockPriceMap[it.id]
             val priceTrend = when {
                 previousPrice == null -> PriceTrend.NEUTRAL
                 it.price > previousPrice
-                    -> PriceTrend.INCREASING
+                -> PriceTrend.INCREASING
+
                 it.price < previousPrice -> PriceTrend.DECREASING
                 else -> PriceTrend.NEUTRAL
             }
@@ -45,10 +54,6 @@ class StockListViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch {
-            val updatedList = getTopFiveStockList()
-            _stockList.value = updatedList
-            _lastUpdatedDate.value = LocalDateTime.now()
-        }
+        // Initial fetch handled by UI lifecycle
     }
 }
